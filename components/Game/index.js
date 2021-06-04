@@ -14,7 +14,7 @@ const MyBackButton = () => {
   );
 };
 
-export const GameScreen = ({ navigation: { navigate } }) => {
+export const GameScreen = () => {
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <Text>This is Game!</Text>

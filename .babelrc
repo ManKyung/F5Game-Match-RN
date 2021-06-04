@@ -1,0 +1,22 @@
+{
+  "plugins": [
+    ["@babel/plugin-proposal-decorators", { "legacy": true }],
+    ["@babel/plugin-proposal-class-properties", { "loose": true }]
+  ],
+  "ignore": [
+    "node_modules",
+    "logs",
+    ".cache",
+    "_cache",
+    "cache",
+    ".build",
+    "_build",
+    "build",
+    ".dist",
+    "_dist",
+    "dist",
+    ".deploy",
+    "_deploy",
+    "deploy"
+  ]
+}
