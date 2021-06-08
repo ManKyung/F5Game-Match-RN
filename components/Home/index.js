@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StatusBar } from "react-native";
+import { View, StatusBar, Text } from "react-native";
 import styled from "styled-components/native";
 
 const ContainerWrap = styled.ImageBackground`
@@ -8,8 +8,12 @@ const ContainerWrap = styled.ImageBackground`
   padding: 40px;
 `;
 
-const PlayButton = styled.Button`
+const PlayButton = styled.TouchableOpacity`
   border-radius: 4px;
+  border: 1px solid #ddd;
+  padding: 20px 40px;
+  margin: 80px auto;
+  background: #4267b2;
 `;
 
 const TitleImage = styled.Image`
@@ -36,7 +40,15 @@ export const HomeScreen = ({ navigation: { navigate } }) => {
         }}
       >
         <TitleImage source={Title}></TitleImage>
-        <PlayButton title="PLAY" onPress={() => navigate("Game")}></PlayButton>
+        <PlayButton
+          onPress={() =>
+            navigate("Game", {
+              headerTitle: "test",
+            })
+          }
+        >
+          <Text>PLAY</Text>
+        </PlayButton>
       </View>
       <View
         style={{

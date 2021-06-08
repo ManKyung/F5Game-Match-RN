@@ -65,6 +65,7 @@ const getImage = () => {
 
 const game = observable({
   items: items,
+  times: 0,
 
   setActive(key, active) {
     this.items[key].active = active;
@@ -81,12 +82,13 @@ const game = observable({
     for (let i = 0; i < length; i++) {
       this.items[i].image = loadImage[randomImageItems[j]];
       this.setNumber(i, randomImageItems[j]);
+      this.items[i].active = false;
       j++;
       if (randomImageItems.length - 1 === i) {
         j = 0;
       }
     }
-    this.items = shuffle(this.items);
+    // this.items = shuffle(this.items);
   },
 
   getItems() {
