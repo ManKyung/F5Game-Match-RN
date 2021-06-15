@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useLayoutEffect } from "react";
 import { Counter } from "./Counter";
 import { Option } from "./Option";
-import { View, Text, Dimensions, Vibration } from "react-native";
+import { View, Dimensions, Vibration } from "react-native";
 import { observer } from "mobx-react";
 import stores from "../../stores";
 import RNModal from "react-native-modal";
@@ -9,12 +9,11 @@ import RNModal from "react-native-modal";
 import styled from "styled-components/native";
 import BackImage from "../../assets/background.png";
 import { Banner, Interstitial } from "../../lib";
+import { Congratulation } from "../Animations";
 
 const containerPadding = 10;
 const tilePadding = 3;
 const screen = Dimensions.get("screen");
-// const tileHeight = (screen.width - containerPadding * 2 - tilePadding * 2) / 4;
-const tileHeight = (screen.width - containerPadding * 2 - tilePadding * 2) / 4;
 
 const Container = styled.View`
   flex: 1;
@@ -60,23 +59,25 @@ const RNModalView = styled.View`
   shadow-radius: 3.84px;
   elevation: 5;
   padding-top: 10px;
+  width: 300px;
+  margin 0 auto;
 `;
 const RNModalTitle = styled.Text`
   font-size: 26px;
   font-weight: bold;
+  padding-bottom: 10px;
+`;
+
+const RNModalDescription = styled.Text`
+  margin-bottom: 10px;
 `;
 
 const RNModalAdmob = styled.View`
   flex-direction: row;
   justify-content: flex-end;
-  margin-vertical: 10px;
 `;
 
-const GameoverButtonWrap = styled.View`
-  flex-direction: row;
-`;
-
-const GameClearButtonWrap = styled.View`
+const RNModalButtonWrap = styled.View`
   flex-direction: row;
 `;
 
@@ -111,11 +112,20 @@ const RNModalNextButtonText = styled.Text`
 
 export const GameScreen = observer(({ navigation }) => {
   const [gameClearModalVisible, setGameClearModalVisible] = useState(false);
+  const [
+    gameClearModalButtonVisible,
+    setGameClearModalButtonVisible,
+  ] = useState(false);
   const [gameOverModalVisible, setGameOverModalVisible] = useState(false);
+  const [gameOverModalButtonVisible, setGameOverModalButtonVisible] = useState(
+    false
+  );
 
   const [isClick, setIsClick] = useState(false);
   const [isStart, setIsStart] = useState(true);
-  const [counter, setCounter] = useState(5);
+  const [counter, setCounter] = useState(0);
+  const [time, setTime] = useState(3);
+  const [adTime, setAdTime] = useState(0);
   const [currentTimer, setCurrentTimer] = useState(null);
   const [gameLevel, setGameLevel] = useState(0);
   const [prevItems, setPrevNumber] = useState({
@@ -123,7 +133,6 @@ export const GameScreen = observer(({ navigation }) => {
     number: null,
   });
   const { items } = stores.game;
-  // console.log(stores.game.getStage());
 
   const column = items.length === 4 ? 2 : 4;
   const tileWidthPercent = items.length === 4 ? "50%" : "25%";
@@ -131,14 +140,16 @@ export const GameScreen = observer(({ navigation }) => {
     (screen.width - containerPadding * 2 - tilePadding * 2) / column;
 
   useEffect(() => {
-    // console.log(123);
     // setTimeout(async () => {
     //   await Interstitial();
     // }, 2000);
+    // stores.game.initScore();
+    // stores.game.setLevel(1);
   }, []);
-  const setGameInit = () => {
+  const setGameInit = async () => {
     stores.game.setImageAndShuffle();
-    setCounter(2000);
+    const stage = await stores.game.getStage();
+    setCounter(stage.time);
   };
 
   useLayoutEffect(() => {
@@ -159,7 +170,6 @@ export const GameScreen = observer(({ navigation }) => {
         setGameLevel(level);
         navigation.setOptions({
           title: `LEVEL ${level}`,
-          // headerTintColor: "#293244",
         });
       }
       getStorage();
@@ -170,16 +180,23 @@ export const GameScreen = observer(({ navigation }) => {
     }
 
     const timer =
-      counter > 0 && setInterval(() => setCounter(counter - 1), 1000);
+      counter > 0 &&
+      setInterval(() => {
+        setCounter(counter - 1);
+        setTime(time + 1);
+        setAdTime(adTime + 1);
+      }, 1000);
 
     setCurrentTimer(timer);
 
-    if (counter === 0) {
+    if (!isStart && counter === 0) {
       doGameOver();
+      setTimeout(() => {
+        setGameOverModalButtonVisible(true);
+      }, 2000);
     }
 
     return () => clearInterval(timer);
-    // }, [navigation, counter, isStart]);
   }, [navigation, counter]);
 
   const doSelect = async (key, item) => {
@@ -217,30 +234,53 @@ export const GameScreen = observer(({ navigation }) => {
     });
 
     if (stores.game.isClear()) {
-      console.log("clear");
       const level = await stores.game.getLevel();
-      stores.game.setLevel(level + 1);
+      stores.game.setLevel(Number(level) + 1);
       setGameClearModalVisible(true);
-
-      console.log("count down release: ", currentTimer);
+      stores.game.setScore(gameLevel, time);
       clearInterval(currentTimer);
+      setTimeout(() => {
+        setGameClearModalButtonVisible(true);
+      }, 2000);
     }
   };
 
   const doNext = () => {
-    setGameInit();
-    setGameClearModalVisible(false);
-    // setTimeout(() => {
-    console.log("restart ready");
-    setIsStart(true);
-    console.log("restart play");
-    // }, 1000);
+    if (adTime > 30) {
+      setAdTime(0);
+      (async () => {
+        const res = await Interstitial();
+        res.addEventListener("interstitialDidClose", () => {
+          setGameInit();
+          setIsStart(true);
+          setGameClearModalButtonVisible(false);
+          setGameClearModalVisible(false);
+        });
+      })();
+    } else {
+      setGameInit();
+      setIsStart(true);
+      setGameClearModalButtonVisible(false);
+      setGameClearModalVisible(false);
+    }
   };
 
   const doRestart = () => {
-    setGameInit();
-    setGameOverModalVisible(false);
-    setIsStart(true);
+    if (adTime > 30) {
+      setAdTime(0);
+      (async () => {
+        const res = await Interstitial();
+        res.addEventListener("interstitialDidClose", () => {
+          setGameInit();
+          setGameOverModalVisible(false);
+          setIsStart(true);
+        });
+      })();
+    } else {
+      setGameInit();
+      setGameOverModalVisible(false);
+      setIsStart(true);
+    }
   };
 
   const doGameOver = () => {
@@ -271,17 +311,22 @@ export const GameScreen = observer(({ navigation }) => {
         isVisible={gameClearModalVisible}
         animationIn="zoomIn"
         animationOut="zoomOut"
+        style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
       >
+        <Congratulation />
         <RNModalView>
+          <Congratulation />
           <RNModalTitle>LEVEL {gameLevel} CLEAR</RNModalTitle>
           <RNModalAdmob>
-            <Text>ADMOB</Text>
+            <Banner bannerSize="mediumRectangle" />
           </RNModalAdmob>
-          <GameClearButtonWrap>
-            <RNModalNextButton onPress={() => doNext()}>
-              <RNModalNextButtonText>NEXT</RNModalNextButtonText>
-            </RNModalNextButton>
-          </GameClearButtonWrap>
+          {gameClearModalButtonVisible ? (
+            <RNModalButtonWrap>
+              <RNModalNextButton onPress={() => doNext()}>
+                <RNModalNextButtonText>NEXT</RNModalNextButtonText>
+              </RNModalNextButton>
+            </RNModalButtonWrap>
+          ) : null}
         </RNModalView>
       </RNModal>
 
@@ -289,23 +334,26 @@ export const GameScreen = observer(({ navigation }) => {
         isVisible={gameOverModalVisible}
         animationIn="zoomIn"
         animationOut="zoomOut"
+        style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
       >
         <RNModalView>
           <RNModalTitle>Game Over</RNModalTitle>
-          <Text>Would you like to try again?</Text>
+          <RNModalDescription>Would you like to try again?</RNModalDescription>
           <RNModalAdmob>
-            <Text>ADMOB</Text>
+            <Banner bannerSize="mediumRectangle" />
           </RNModalAdmob>
-          <GameoverButtonWrap>
-            <RNModalNextButtonLeft
-              onPress={() => setGameOverModalVisible(false)}
-            >
-              <RNModalNextButtonText>No</RNModalNextButtonText>
-            </RNModalNextButtonLeft>
-            <RNModalNextButtonRight onPress={() => doRestart()}>
-              <RNModalNextButtonText>Okay</RNModalNextButtonText>
-            </RNModalNextButtonRight>
-          </GameoverButtonWrap>
+          {gameOverModalButtonVisible ? (
+            <RNModalButtonWrap>
+              <RNModalNextButtonLeft
+                onPress={() => setGameOverModalVisible(false)}
+              >
+                <RNModalNextButtonText>No</RNModalNextButtonText>
+              </RNModalNextButtonLeft>
+              <RNModalNextButtonRight onPress={() => doRestart()}>
+                <RNModalNextButtonText>Okay</RNModalNextButtonText>
+              </RNModalNextButtonRight>
+            </RNModalButtonWrap>
+          ) : null}
         </RNModalView>
       </RNModal>
     </ContainerWrap>

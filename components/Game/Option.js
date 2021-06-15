@@ -1,12 +1,9 @@
 import React, { useState, useCallback } from "react";
 import {
-  StyleSheet,
   Text,
   View,
-  Button,
   FlatList,
   TouchableHighlight,
-  TouchableOpacity,
   Linking,
   Alert,
 } from "react-native";
@@ -86,7 +83,7 @@ export const Option = ({ navigation: { navigate } }) => {
           </OptionItem>
         ) : null}
         {item.id === "more" ? (
-          <OptionItem onPress={() => console.log(123)}>
+          <OptionItem>
             <OpenURLText url={moreGameUrl} text={item.title} />
           </OptionItem>
         ) : null}

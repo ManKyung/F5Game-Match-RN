@@ -1,27 +1,17 @@
-import React, { useState, useLayoutEffect } from "react";
-import { View, Text, FlatList, TouchableHighlight } from "react-native";
+import React, { useState, useEffect, useLayoutEffect } from "react";
+import {
+  View,
+  Text,
+  SafeAreaView,
+  ScrollView,
+  TouchableHighlight,
+} from "react-native";
 import styled from "styled-components/native";
 import { IconButton } from "react-native-paper";
 import RNModal from "react-native-modal";
 import stores from "../../stores";
+import { convertTime } from "../../lib";
 
-const DATA = [
-  {
-    id: "1",
-    title: "LEVEL 1",
-    time: "30",
-  },
-  {
-    id: "2",
-    title: "LEVEL 2",
-    time: "232",
-  },
-  {
-    id: "3",
-    title: "LEVEL 3",
-    time: "130",
-  },
-];
 const ScoreItem = styled.TouchableOpacity`
   padding: 14px;
   border-bottom-width: 1px;
@@ -80,22 +70,22 @@ const RNModalNextButtonText = styled.Text`
   text-align: center;
 `;
 
-const renderItem = ({ item }) => {
-  return (
-    <ScoreItem>
-      <TitleText>{item.title}</TitleText>
-      <TimeText style={{ textAlign: "right" }}>{item.time}</TimeText>
-    </ScoreItem>
-  );
-};
-
 export const ScoreScreen = ({ navigation }) => {
   const [isResetVisible, setIsResetVisible] = useState(false);
+  const [scoreItems, setScoreItems] = useState([]);
 
   const doReset = async () => {
     await stores.game.setLevel(1);
+    await stores.game.initScore();
     setIsResetVisible(false);
   };
+
+  useEffect(() => {
+    (async () => {
+      const data = await stores.game.getScore();
+      setScoreItems(data);
+    })();
+  }, []);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -131,10 +121,32 @@ export const ScoreScreen = ({ navigation }) => {
     });
   });
   return (
-    <FlatList
-      data={DATA}
-      renderItem={renderItem}
-      keyExtractor={(item) => item.id}
-    />
+    <>
+      {scoreItems.length ? (
+        <SafeAreaView>
+          <ScrollView>
+            {scoreItems.map((item) => (
+              <ScoreItem key={item.level.toString()}>
+                <TitleText>LEVEL {item.level}</TitleText>
+                <TimeText style={{ textAlign: "right" }}>
+                  {convertTime(item.time)}
+                </TimeText>
+              </ScoreItem>
+            ))}
+          </ScrollView>
+        </SafeAreaView>
+      ) : (
+        <View
+          style={{
+            justifyContent: "center",
+            alignItem: "center",
+            flexDirection: "row",
+            marginTop: 30,
+          }}
+        >
+          <Text>No Score</Text>
+        </View>
+      )}
+    </>
   );
 };

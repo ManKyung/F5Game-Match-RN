@@ -1,20 +1,15 @@
 import React from "react";
-import { View, StatusBar, Text } from "react-native";
+import { View, StatusBar } from "react-native";
 import styled from "styled-components/native";
-import { Loader, Congratulation, Walk } from "../Animations";
-import {
-  AdMobBanner,
-  AdMobInterstitial,
-  PublisherBanner,
-  AdMobRewarded,
-  setTestDeviceIDAsync,
-} from "expo-ads-admob";
+import { Walk } from "../Animations";
+import TitlePng from "../../assets/title.png";
 // import { Congratulation } from "../Animations/Congratulation";
 
 const ContainerWrap = styled.ImageBackground`
   flex: 1;
   justify-content: center;
   padding: 40px;
+  background: #e1e2e3;
 `;
 
 const PlayButton = styled.TouchableOpacity`
@@ -33,7 +28,7 @@ const PlayButtonText = styled.Text`
 
 const TitleImage = styled.Image`
   width: 100%;
-  margin-bottom: 50px;
+  margin-top: 70px;
 `;
 
 export const HomeScreen = ({ navigation: { navigate } }) => {
@@ -47,8 +42,7 @@ export const HomeScreen = ({ navigation: { navigate } }) => {
           flexWrap: "wrap",
         }}
       >
-        <Text>Brain Match</Text>
-        <Loader />
+        <TitleImage source={TitlePng}></TitleImage>
       </View>
 
       <View
@@ -64,7 +58,6 @@ export const HomeScreen = ({ navigation: { navigate } }) => {
           flex: 1,
         }}
       >
-        <TitleImage></TitleImage>
         <PlayButton onPress={() => navigate("Game")}>
           <PlayButtonText>PLAY</PlayButtonText>
         </PlayButton>

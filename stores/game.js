@@ -1,4 +1,4 @@
-import { action, observable, runInAction } from "mobx";
+import { observable, runInAction } from "mobx";
 import { levels } from "../lib";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -33,7 +33,14 @@ const loadImage = [
 const doGetLevel = () => {
   return new Promise(async (resolve) => {
     const level = await AsyncStorage.getItem("level");
-    resolve(level);
+    resolve(level ? Number(level) : 1);
+  });
+};
+
+const doGetScore = () => {
+  return new Promise(async (resolve) => {
+    const score = await AsyncStorage.getItem("score");
+    resolve(score ? JSON.parse(score) : []);
   });
 };
 
@@ -49,8 +56,6 @@ const getRandomNumber = (min, max) => {
   const r = Math.random() * (max - min) + min;
   return Math.floor(r);
 };
-
-const getTileLength = () => {};
 
 const getImage = (items) => {
   let imageItems = [];
@@ -77,7 +82,6 @@ const game = observable({
 
   getStage: async () => {
     const level = await doGetLevel();
-    console.log(1111, level);
     return levels[level - 1];
   },
 
@@ -105,10 +109,9 @@ const game = observable({
 
   setItems(level) {
     let t = [];
-    console.log(level);
 
     const stage = levels[level - 1];
-    const len = stage.row * stage.row;
+    const len = stage.row * stage.col;
     for (let i = 0; i < len; i += 1) {
       t.push({
         id: i,
@@ -127,7 +130,6 @@ const game = observable({
     runInAction(() => {
       const randomImageItems = getImage(this.items);
       const length = this.items.length;
-      console.log(length);
       let j = 0;
       for (let i = 0; i < length; i++) {
         this.items[i].image = loadImage[randomImageItems[j]];
@@ -138,7 +140,7 @@ const game = observable({
           j = 0;
         }
       }
-      // this.items = shuffle(this.items);
+      this.items = shuffle(this.items);
     });
   },
 
@@ -150,6 +152,24 @@ const game = observable({
   isClear() {
     const e = this.items.filter((item) => item.active === false);
     return e.length === 0 ? true : false;
+  },
+
+  async initScore() {
+    await AsyncStorage.setItem("score", JSON.stringify([]));
+  },
+
+  async setScore(level, time) {
+    let score = await doGetScore();
+    score.push({
+      level,
+      time,
+    });
+    await AsyncStorage.setItem("score", JSON.stringify(score));
+  },
+
+  async getScore() {
+    const score = await doGetScore();
+    return score;
   },
 });
 

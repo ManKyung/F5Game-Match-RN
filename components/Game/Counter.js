@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components/native";
+import { convertTime } from "../../lib";
 
 const CouterText = styled.Text`
   padding-right: 10px;
@@ -8,9 +9,6 @@ const CouterText = styled.Text`
 `;
 
 export const Counter = ({ counter }) => {
-  const convertTime = (seconds) => {
-    return new Date(seconds * 1000).toISOString().substr(14, 5);
-  };
   return (
     <>
       <CouterText>{convertTime(counter)}</CouterText>
