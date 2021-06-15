@@ -3,11 +3,10 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { HomeScreen } from "./components/Home";
 import { GameScreen } from "./components/Game";
-import { ModalTester } from "./components/Modal";
-import { Time } from "./components/Game/Time";
-import { Button } from "react-native";
-const Stack = createStackNavigator();
+import { ScoreScreen } from "./components/Score";
 
+// Set global test device ID
+const Stack = createStackNavigator();
 const App = () => {
   return (
     <NavigationContainer>
@@ -19,14 +18,8 @@ const App = () => {
             headerShown: false,
           }}
         /> */}
-        {/* <Stack.Screen
-          name="Modal"
-          component={ModalTester}
-          options={{
-            headerShown: false,
-          }}
-        /> */}
         <Stack.Screen title="LEVEL" name="Game" component={GameScreen} />
+        <Stack.Screen title="SCORE" name="Score" component={ScoreScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

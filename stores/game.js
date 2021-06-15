@@ -1,4 +1,6 @@
-import { observable, runInAction } from "mobx";
+import { action, observable, runInAction } from "mobx";
+import { levels } from "../lib";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const loadImage = [
   require("../assets/images/0.png"),
@@ -28,15 +30,12 @@ const loadImage = [
   require("../assets/images/24.png"),
 ];
 
-const items = [];
-for (let i = 0; i < 16; i += 1) {
-  items.push({
-    id: i,
-    image: require("../assets/favicon.png"),
-    active: false,
-    number: 0,
+const doGetLevel = () => {
+  return new Promise(async (resolve) => {
+    const level = await AsyncStorage.getItem("level");
+    resolve(level);
   });
-}
+};
 
 const shuffle = (a) => {
   for (let i = a.length - 1; i > 0; i--) {
@@ -51,9 +50,12 @@ const getRandomNumber = (min, max) => {
   return Math.floor(r);
 };
 
-const getImage = () => {
+const getTileLength = () => {};
+
+const getImage = (items) => {
   let imageItems = [];
-  while (imageItems.length !== 8) {
+  const len = items.length / 2;
+  while (imageItems.length !== len) {
     const randomNumber = getRandomNumber(0, 25);
     if (!imageItems.includes(randomNumber)) {
       imageItems.push(randomNumber);
@@ -64,31 +66,80 @@ const getImage = () => {
 };
 
 const game = observable({
-  items: items,
+  items: [],
   times: 0,
+  isVibration: true,
+
+  getLevel: async () => {
+    const level = await doGetLevel();
+    return level ? level : 1;
+  },
+
+  getStage: async () => {
+    const level = await doGetLevel();
+    console.log(1111, level);
+    return levels[level - 1];
+  },
+
+  async setLevel(level) {
+    await AsyncStorage.setItem("level", `${level}`);
+  },
 
   setActive(key, active) {
     this.items[key].active = active;
+  },
+
+  setVibration() {
+    this.isVibration = !this.isVibration;
+  },
+
+  setActiveClose() {
+    for (const i in this.items) {
+      this.items[i].active = false;
+    }
   },
 
   setNumber(key, number) {
     this.items[key].number = number;
   },
 
-  setImageAndShuffle() {
-    const randomImageItems = getImage();
-    const length = this.items.length;
-    let j = 0;
-    for (let i = 0; i < length; i++) {
-      this.items[i].image = loadImage[randomImageItems[j]];
-      this.setNumber(i, randomImageItems[j]);
-      this.items[i].active = false;
-      j++;
-      if (randomImageItems.length - 1 === i) {
-        j = 0;
-      }
+  setItems(level) {
+    let t = [];
+    console.log(level);
+
+    const stage = levels[level - 1];
+    const len = stage.row * stage.row;
+    for (let i = 0; i < len; i += 1) {
+      t.push({
+        id: i,
+        image: require("../assets/favicon.png"),
+        active: false,
+        number: 0,
+      });
     }
-    // this.items = shuffle(this.items);
+    this.items = t;
+  },
+
+  async setImageAndShuffle() {
+    const level = await doGetLevel();
+    this.setItems(level);
+
+    runInAction(() => {
+      const randomImageItems = getImage(this.items);
+      const length = this.items.length;
+      console.log(length);
+      let j = 0;
+      for (let i = 0; i < length; i++) {
+        this.items[i].image = loadImage[randomImageItems[j]];
+        this.setNumber(i, randomImageItems[j]);
+        this.items[i].active = true;
+        j++;
+        if (randomImageItems.length - 1 === i) {
+          j = 0;
+        }
+      }
+      // this.items = shuffle(this.items);
+    });
   },
 
   getItems() {

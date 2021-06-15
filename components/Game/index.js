@@ -1,25 +1,19 @@
 import React, { useState, useEffect, useLayoutEffect } from "react";
-import {
-  View,
-  Text,
-  Dimensions,
-  Platform,
-  Vibration,
-  Button,
-  StyleSheet,
-  Pressable,
-  TouchableOpacity,
-} from "react-native";
+import { Counter } from "./Counter";
+import { Option } from "./Option";
+import { View, Text, Dimensions, Vibration } from "react-native";
 import { observer } from "mobx-react";
 import stores from "../../stores";
 import RNModal from "react-native-modal";
 
 import styled from "styled-components/native";
 import BackImage from "../../assets/background.png";
+import { Banner, Interstitial } from "../../lib";
 
 const containerPadding = 10;
 const tilePadding = 3;
 const screen = Dimensions.get("screen");
+// const tileHeight = (screen.width - containerPadding * 2 - tilePadding * 2) / 4;
 const tileHeight = (screen.width - containerPadding * 2 - tilePadding * 2) / 4;
 
 const Container = styled.View`
@@ -61,16 +55,14 @@ const RNModalView = styled.View`
   justify-content: center;
   align-items: center;
   background-color: white;
-  border-radius: 8px;
-  padding-horizontal: 10px;
-  padding-vertical: 14px;
   shadow-color: #000;
   shadow-opacity: 0.2;
   shadow-radius: 3.84px;
   elevation: 5;
+  padding-top: 10px;
 `;
 const RNModalTitle = styled.Text`
-  font-size: 36px;
+  font-size: 26px;
   font-weight: bold;
 `;
 
@@ -80,46 +72,50 @@ const RNModalAdmob = styled.View`
   margin-vertical: 10px;
 `;
 
-const RNModalNextButtonWrap = styled.View`
+const GameoverButtonWrap = styled.View`
   flex-direction: row;
-  justify-content: flex-end;
+`;
+
+const GameClearButtonWrap = styled.View`
+  flex-direction: row;
 `;
 
 const RNModalNextButton = styled.TouchableOpacity`
   background-color: #222f3e;
-  padding-vertical: 6px;
-  padding-horizontal: 10px;
-  border-radius: 4px;
-  elevation: 2;
-  shadow-color: #000;
-  shadow-opacity: 0.25;
-  shadow-radius: 3.5px;
-  padding: 10px;
-  color: #fff;
-`;
-const RNModalNextButtonText = styled.Text`
-  color: #aaa;
-  font-size: 14px;
+  padding-vertical: 15px;
+  flex: 1;
 `;
 
-const ClearModalView = styled.View`
-  margin: 20px;
-  background-color: white;
-  padding: 35px;
-  align-items: center;
-  shadow-color: #000;
-  shadow-opacity: 0.25;
-  elevation: 5;
-  border-radius: 8px;
+const RNModalNextButtonLeft = styled.TouchableOpacity`
+  background-color: #222f3e;
+  border-top-width: 1px;
+  border-top-color: #383f48;
+  border-right-width: 1px;
+  border-right-color: #383f48;
+  padding-vertical: 15px;
+  flex: 1;
+`;
+const RNModalNextButtonRight = styled.TouchableOpacity`
+  background-color: #222f3e;
+  border-top-width: 1px;
+  border-top-color: #383f48;
+  padding-vertical: 15px;
+  flex: 1;
+`;
+
+const RNModalNextButtonText = styled.Text`
   color: #fff;
+  font-size: 18px;
+  text-align: center;
 `;
 
 export const GameScreen = observer(({ navigation }) => {
-  const [rnmodalVisible, setRNModalVisible] = useState(false);
+  const [gameClearModalVisible, setGameClearModalVisible] = useState(false);
+  const [gameOverModalVisible, setGameOverModalVisible] = useState(false);
 
   const [isClick, setIsClick] = useState(false);
-  const [counter, setCounter] = useState(30);
   const [isStart, setIsStart] = useState(true);
+  const [counter, setCounter] = useState(5);
   const [currentTimer, setCurrentTimer] = useState(null);
   const [gameLevel, setGameLevel] = useState(0);
   const [prevItems, setPrevNumber] = useState({
@@ -127,37 +123,64 @@ export const GameScreen = observer(({ navigation }) => {
     number: null,
   });
   const { items } = stores.game;
+  // console.log(stores.game.getStage());
 
+  const column = items.length === 4 ? 2 : 4;
+  const tileWidthPercent = items.length === 4 ? "50%" : "25%";
+  const tileHeight =
+    (screen.width - containerPadding * 2 - tilePadding * 2) / column;
+
+  useEffect(() => {
+    // console.log(123);
+    // setTimeout(async () => {
+    //   await Interstitial();
+    // }, 2000);
+  }, []);
   const setGameInit = () => {
     stores.game.setImageAndShuffle();
-    setCounter(30);
+    setCounter(2000);
   };
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight: () => <Text>{counter}</Text>,
+      headerRight: () => (
+        <View style={{ flexDirection: "row" }}>
+          <Counter counter={counter} />
+          <Option navigation={navigation} />
+        </View>
+      ),
     });
 
     if (isStart) {
       setIsStart(false);
       setGameInit();
-
       async function getStorage() {
-        const level = await stores.getLevel();
+        const level = await stores.game.getLevel();
         setGameLevel(level);
-        navigation.setOptions({ title: `LEVEL ${level}` });
+        navigation.setOptions({
+          title: `LEVEL ${level}`,
+          // headerTintColor: "#293244",
+        });
       }
       getStorage();
+
+      setTimeout(() => {
+        stores.game.setActiveClose();
+      }, 3000);
     }
 
     const timer =
       counter > 0 && setInterval(() => setCounter(counter - 1), 1000);
-    console.log(timer, counter);
-    setCurrentTimer(timer);
-    return () => clearInterval(timer);
-  }, [navigation, counter, isStart]);
 
-  useEffect(() => {}, []);
+    setCurrentTimer(timer);
+
+    if (counter === 0) {
+      doGameOver();
+    }
+
+    return () => clearInterval(timer);
+    // }, [navigation, counter, isStart]);
+  }, [navigation, counter]);
 
   const doSelect = async (key, item) => {
     if (isClick || item.active) {
@@ -177,13 +200,16 @@ export const GameScreen = observer(({ navigation }) => {
     } else {
       setIsClick(true);
       stores.game.setActive(key, true);
-      // Vibration.vibrate();
+
+      if (stores.game.isVibration) {
+        Vibration.vibrate();
+      }
 
       setTimeout(() => {
         stores.game.setActive(prevItems.key, false);
         stores.game.setActive(key, false);
         setIsClick(false);
-      }, 600);
+      }, 200);
     }
     setPrevNumber({
       key: null,
@@ -192,27 +218,33 @@ export const GameScreen = observer(({ navigation }) => {
 
     if (stores.game.isClear()) {
       console.log("clear");
-      const level = await stores.getLevel();
-      stores.setLevel(level + 1);
-      setRNModalVisible(true);
+      const level = await stores.game.getLevel();
+      stores.game.setLevel(level + 1);
+      setGameClearModalVisible(true);
 
       console.log("count down release: ", currentTimer);
       clearInterval(currentTimer);
-
-      // setGameInit();
     }
   };
 
   const doNext = () => {
-    setRNModalVisible(false);
-    console.log("count down release: ", currentTimer);
-    clearInterval(currentTimer);
-    setTimeout(() => {
-      console.log("restart ready");
-      setGameInit();
-      setIsStart(true);
-      console.log("restart play");
-    }, 1000);
+    setGameInit();
+    setGameClearModalVisible(false);
+    // setTimeout(() => {
+    console.log("restart ready");
+    setIsStart(true);
+    console.log("restart play");
+    // }, 1000);
+  };
+
+  const doRestart = () => {
+    setGameInit();
+    setGameOverModalVisible(false);
+    setIsStart(true);
+  };
+
+  const doGameOver = () => {
+    setGameOverModalVisible(true);
   };
 
   return (
@@ -220,7 +252,10 @@ export const GameScreen = observer(({ navigation }) => {
       <Container>
         {items.map((item, key) => {
           return (
-            <Tile style={{ height: tileHeight }} key={item.id}>
+            <Tile
+              style={{ height: tileHeight, width: tileWidthPercent }}
+              key={item.id}
+            >
               <InnerTile onPress={() => doSelect(key, item)}>
                 <TileImage
                   source={item.image}
@@ -231,8 +266,9 @@ export const GameScreen = observer(({ navigation }) => {
           );
         })}
       </Container>
+      <Banner />
       <RNModal
-        isVisible={rnmodalVisible}
+        isVisible={gameClearModalVisible}
         animationIn="zoomIn"
         animationOut="zoomOut"
       >
@@ -241,13 +277,35 @@ export const GameScreen = observer(({ navigation }) => {
           <RNModalAdmob>
             <Text>ADMOB</Text>
           </RNModalAdmob>
-          <RNModalNextButtonWrap>
+          <GameClearButtonWrap>
             <RNModalNextButton onPress={() => doNext()}>
-              <RNModalNextButtonText>
-                LEVEL {gameLevel + 1} START
-              </RNModalNextButtonText>
+              <RNModalNextButtonText>NEXT</RNModalNextButtonText>
             </RNModalNextButton>
-          </RNModalNextButtonWrap>
+          </GameClearButtonWrap>
+        </RNModalView>
+      </RNModal>
+
+      <RNModal
+        isVisible={gameOverModalVisible}
+        animationIn="zoomIn"
+        animationOut="zoomOut"
+      >
+        <RNModalView>
+          <RNModalTitle>Game Over</RNModalTitle>
+          <Text>Would you like to try again?</Text>
+          <RNModalAdmob>
+            <Text>ADMOB</Text>
+          </RNModalAdmob>
+          <GameoverButtonWrap>
+            <RNModalNextButtonLeft
+              onPress={() => setGameOverModalVisible(false)}
+            >
+              <RNModalNextButtonText>No</RNModalNextButtonText>
+            </RNModalNextButtonLeft>
+            <RNModalNextButtonRight onPress={() => doRestart()}>
+              <RNModalNextButtonText>Okay</RNModalNextButtonText>
+            </RNModalNextButtonRight>
+          </GameoverButtonWrap>
         </RNModalView>
       </RNModal>
     </ContainerWrap>

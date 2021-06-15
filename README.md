@@ -5,8 +5,14 @@
 - yarn add @react-navigation/native
 - yarn add @react-navigation/stack
 - yarn add react-native-reanimated react-native-gesture-handler react-native-screens react-native-safe-area-context @react-native-community/masked-view
-- yarn add native-base
 - yarn add react-native-storage
 - yarn add @react-native-community/async-storage
 - react-native link @react-native-community/async-storage
 - yarn add react-native-modal
+- yarn add lottie-react-native
+- yarn add lottie-ios@3.1.8
+- yarn add react-native-vector-icons
+- yarn add react-native-paper
+- yarn add react-native-popup-menu
+- yarn add expo-constants
+- expo install expo-ads-admob

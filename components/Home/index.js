@@ -1,6 +1,15 @@
 import React from "react";
 import { View, StatusBar, Text } from "react-native";
 import styled from "styled-components/native";
+import { Loader, Congratulation, Walk } from "../Animations";
+import {
+  AdMobBanner,
+  AdMobInterstitial,
+  PublisherBanner,
+  AdMobRewarded,
+  setTestDeviceIDAsync,
+} from "expo-ads-admob";
+// import { Congratulation } from "../Animations/Congratulation";
 
 const ContainerWrap = styled.ImageBackground`
   flex: 1;
@@ -9,11 +18,17 @@ const ContainerWrap = styled.ImageBackground`
 `;
 
 const PlayButton = styled.TouchableOpacity`
-  border-radius: 4px;
-  border: 1px solid #ddd;
-  padding: 20px 40px;
-  margin: 80px auto;
-  background: #4267b2;
+  padding: 15px 25px;
+  text-decoration: none;
+  background-color: #4a63b4;
+  border-radius: 15px;
+  elevation: 35;
+`;
+
+const PlayButtonText = styled.Text`
+  font-size: 20px;
+  color: #fff;
+  text-align: center;
 `;
 
 const TitleImage = styled.Image`
@@ -21,42 +36,39 @@ const TitleImage = styled.Image`
   margin-bottom: 50px;
 `;
 
-const Title = require("../../assets/title.png");
-const Logo = require("../../assets/logo.png");
 export const HomeScreen = ({ navigation: { navigate } }) => {
   return (
-    <ContainerWrap source={Logo}>
+    <ContainerWrap>
       <StatusBar hidden={true} />
       <View
         style={{
           flex: 1,
-          // flexDirection: "row",
-          // flexWrap: "wrap",
-        }}
-      ></View>
-      <View
-        style={{
-          flex: 3,
+          flexDirection: "row",
+          flexWrap: "wrap",
         }}
       >
-        <TitleImage source={Title}></TitleImage>
-        <PlayButton
-          onPress={() =>
-            navigate("Game", {
-              headerTitle: "test",
-            })
-          }
-        >
-          <Text>PLAY</Text>
-        </PlayButton>
+        <Text>Brain Match</Text>
+        <Loader />
       </View>
+
+      <View
+        style={{
+          flex: 2,
+        }}
+      >
+        <Walk />
+      </View>
+
       <View
         style={{
           flex: 1,
-          // flexDirection: "row",
-          // flexWrap: "wrap",
         }}
-      ></View>
+      >
+        <TitleImage></TitleImage>
+        <PlayButton onPress={() => navigate("Game")}>
+          <PlayButtonText>PLAY</PlayButtonText>
+        </PlayButton>
+      </View>
     </ContainerWrap>
   );
 };
