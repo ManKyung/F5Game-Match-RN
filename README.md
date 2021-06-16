@@ -16,8 +16,5 @@
 - yarn add react-native-popup-menu
 - yarn add expo-constants
 - expo install expo-ads-admob
-- <!-- - expo install expo-firebase-analytics -->
-
-// Analyticcs 설정하기
-// 스플래쉬 이미지
-// 홈 스크린 꾸미기
+- expo install expo-firebase-analytics
+- yarn add react-native-uuid

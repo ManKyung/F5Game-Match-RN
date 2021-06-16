@@ -10,6 +10,8 @@ import styled from "styled-components/native";
 import BackImage from "../../assets/background.png";
 import { Banner, Interstitial } from "../../lib";
 import { Congratulation } from "../Animations";
+import * as Analytics from "expo-firebase-analytics";
+import uuid from "react-native-uuid";
 
 const containerPadding = 10;
 const tilePadding = 3;
@@ -140,11 +142,13 @@ export const GameScreen = observer(({ navigation }) => {
     (screen.width - containerPadding * 2 - tilePadding * 2) / column;
 
   useEffect(() => {
-    // setTimeout(async () => {
-    //   await Interstitial();
-    // }, 2000);
-    // stores.game.initScore();
-    // stores.game.setLevel(1);
+    (async () => {
+      await Analytics.logEvent("game_view", {
+        name: "game_start",
+        screen: "GAME",
+        purpose: "GAME_START",
+      });
+    })();
   }, []);
   const setGameInit = async () => {
     stores.game.setImageAndShuffle();
@@ -246,7 +250,8 @@ export const GameScreen = observer(({ navigation }) => {
   };
 
   const doNext = () => {
-    if (adTime > 30) {
+    console.log(adTime);
+    if (adTime > 15) {
       setAdTime(0);
       (async () => {
         const res = await Interstitial();
@@ -266,7 +271,7 @@ export const GameScreen = observer(({ navigation }) => {
   };
 
   const doRestart = () => {
-    if (adTime > 30) {
+    if (adTime > 15) {
       setAdTime(0);
       (async () => {
         const res = await Interstitial();

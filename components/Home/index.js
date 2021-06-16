@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, StatusBar } from "react-native";
 import styled from "styled-components/native";
 import { Walk } from "../Animations";
