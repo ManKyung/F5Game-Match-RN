@@ -250,8 +250,7 @@ export const GameScreen = observer(({ navigation }) => {
   };
 
   const doNext = () => {
-    console.log(adTime);
-    if (adTime > 15) {
+    if (adTime > 30) {
       setAdTime(0);
       (async () => {
         const res = await Interstitial();
@@ -271,7 +270,7 @@ export const GameScreen = observer(({ navigation }) => {
   };
 
   const doRestart = () => {
-    if (adTime > 15) {
+    if (adTime > 30) {
       setAdTime(0);
       (async () => {
         const res = await Interstitial();
