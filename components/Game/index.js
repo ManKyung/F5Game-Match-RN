@@ -11,7 +11,6 @@ import BackImage from "../../assets/background.png";
 import { Banner, Interstitial } from "../../lib";
 import { Congratulation } from "../Animations";
 import * as Analytics from "expo-firebase-analytics";
-import uuid from "react-native-uuid";
 
 const containerPadding = 10;
 const tilePadding = 3;
