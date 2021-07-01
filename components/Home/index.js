@@ -1,67 +1,31 @@
-import React, { useEffect } from "react";
-import { View, StatusBar } from "react-native";
-import styled from "styled-components/native";
-import { Walk } from "../Animations";
-import TitlePng from "../../assets/title.png";
-// import { Congratulation } from "../Animations/Congratulation";
+import React from "react";
+import { View, StyleSheet } from "react-native";
+import { StatusBar } from "expo-status-bar";
+import { Cat } from "../Animations";
+import GradientButton from "react-native-gradient-buttons";
 
-const ContainerWrap = styled.ImageBackground`
-  flex: 1;
-  justify-content: center;
-  padding: 40px;
-  background: #e1e2e3;
-`;
-
-const PlayButton = styled.TouchableOpacity`
-  padding: 15px 25px;
-  text-decoration: none;
-  background-color: #4a63b4;
-  border-radius: 15px;
-  elevation: 35;
-`;
-
-const PlayButtonText = styled.Text`
-  font-size: 20px;
-  color: #fff;
-  text-align: center;
-`;
-
-const TitleImage = styled.Image`
-  width: 100%;
-  margin-top: 70px;
-`;
-
-export const HomeScreen = ({ navigation: { navigate } }) => {
+export const HomeScreen = ({ navigation }) => {
   return (
-    <ContainerWrap>
-      <StatusBar hidden={true} />
-      <View
-        style={{
-          flex: 1,
-          flexDirection: "row",
-          flexWrap: "wrap",
-        }}
-      >
-        <TitleImage source={TitlePng}></TitleImage>
+    <>
+      <View style={styles.view}>
+        <Cat />
       </View>
-
-      <View
-        style={{
-          flex: 2,
-        }}
-      >
-        <Walk />
+      <View style={styles.view}>
+        <GradientButton
+          text="PLAY"
+          width="70%"
+          deepBlue
+          onPressAction={() => navigation.push("Game")}
+        />
+        <StatusBar hidden={true} />
       </View>
-
-      <View
-        style={{
-          flex: 1,
-        }}
-      >
-        <PlayButton onPress={() => navigate("Game")}>
-          <PlayButtonText>PLAY</PlayButtonText>
-        </PlayButton>
-      </View>
-    </ContainerWrap>
+    </>
   );
 };
+const styles = StyleSheet.create({
+  view: {
+    flex: 1,
+    alignItems: "center",
+    backgroundColor: "#222B45",
+  },
+});

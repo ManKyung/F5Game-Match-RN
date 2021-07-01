@@ -134,7 +134,6 @@ export const GameScreen = observer(({ navigation }) => {
     number: null,
   });
   const { items } = stores.game;
-
   const column = items.length === 4 ? 2 : 4;
   const tileWidthPercent = items.length === 4 ? "50%" : "25%";
   const tileHeight =
