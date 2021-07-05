@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "f5game-match",
+    "name": "Picture Match",
     "slug": "Brain-Match",
     "version": "2.0.0",
     "orientation": "portrait",
@@ -30,7 +30,7 @@
         "googleMobileAdsAppId": "ca-app-pub-1963334904140891~1474795556"
       },
       "package": "com.f5game.memory",
-      "versionCode": 3
+      "versionCode": 5
     },
     "web": {
       "favicon": "./assets/favicon.png",
