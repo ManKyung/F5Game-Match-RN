@@ -1,8 +1,17 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Text } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Cat } from "../Animations";
 import GradientButton from "react-native-gradient-buttons";
+import styled from "styled-components/native";
+import { Banner } from "../../lib";
+
+const RNModalAdmob = styled.View`
+  flex-direction: row;
+  justify-content: flex-end;
+  margin-top: -40px;
+  margin-bottom: 40px;
+`;
 
 export const HomeScreen = ({ navigation }) => {
   return (
@@ -11,6 +20,9 @@ export const HomeScreen = ({ navigation }) => {
         <Cat />
       </View>
       <View style={styles.view}>
+        <RNModalAdmob>
+          <Banner bannerSize="mediumRectangle" />
+        </RNModalAdmob>
         <GradientButton
           text="PLAY"
           width="70%"
